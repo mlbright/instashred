@@ -24,11 +24,11 @@ const DEBUG bool = false
 
 const INPUT_FILENAME string = "TokyoPanoramaShredded.png"
 const OUTPUT_FILENAME string = "TokyoPanorama.png"
-const SHRED_WIDTH int = 32
 
 var shredded_image image.Image
 var image_size image.Point
 var shred_count int
+var shred_width int
 
 // =====================================================================
 // PIXEL OPERATIONS
@@ -68,9 +68,9 @@ func PixelSimilarity(pixel1, pixel2 image.Color) float64 {
 //
 func GetShred(shred_index int) *image.RGBA {
         bounds := shredded_image.Bounds()
-        shred := image.NewRGBA(SHRED_WIDTH, bounds.Dy())
+        shred := image.NewRGBA(shred_width, bounds.Dy())
         draw_rect := shred.Bounds()
-        src_point := bounds.Min.Add(image.Pt(SHRED_WIDTH*shred_index, 0))
+        src_point := bounds.Min.Add(image.Pt(shred_width*shred_index, 0))
 
         draw.Draw(shred, draw_rect, shredded_image, src_point, draw.Src)
         return shred
@@ -103,6 +103,25 @@ func ShredSimilarity(left_shred, right_shred image.Image) float64 {
         }
         similarity /= float64(left_shred_height)
         return similarity
+}
+
+func FindShredWidth(img *image.Gray) int {
+        bounds := img.Bounds()
+        width := bounds.Max.X
+        height := bounds.Max.Y
+        avg := make([]float64,width)
+        for x:=0; x < width; x++ {
+                tmp := 0.0
+                for y:=0; y < height; y++ {
+                        tmp += 0.0
+                }
+                avg[x] = tmp / float64(height)
+        }
+        for z:=0; z < width; z++ {
+                fmt.Println("%.2f\n",avg[z])
+        }
+        shred_width = 32
+        return 0
 }
 
 //
@@ -170,7 +189,7 @@ func ReadPNGFile(filename string) image.Image {
         return img
 }
 
-func PNGtoGrayscale(img image.Image) image.Image {
+func PNGtoGrayscale(img image.Image) *image.Gray {
         bounds := img.Bounds()
         w, h := bounds.Max.X, bounds.Max.Y
         gray := image.NewGray(w, h)
@@ -278,7 +297,7 @@ func Unshred() image.Image {
         unshredded_image := image.NewRGBA(image_size.X, image_size.Y)
         shred_index := (rightmost_shred + 1) % 20
         for i := 0; i < shred_count; i++ {
-                CopyShredToImage(unshredded_image, shredded_image, i, shred_ordering[shred_index], SHRED_WIDTH)
+                CopyShredToImage(unshredded_image, shredded_image, i, shred_ordering[shred_index], shred_width)
                 shred_index = (shred_index + 1) % 20
         }
         DbgPrintln(shred_ordering)
@@ -288,7 +307,8 @@ func Unshred() image.Image {
 func main() {
         shredded_image = ReadPNGFile(INPUT_FILENAME)
         image_size = shredded_image.Bounds().Size()
-        shred_count = image_size.X / SHRED_WIDTH
+        FindShredWidth(PNGtoGrayscale(shredded_image))
+        shred_count = image_size.X / shred_width
 
         if DEBUG {
                 PrintSimilarityMatrix()
