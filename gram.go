@@ -105,23 +105,47 @@ func ShredSimilarity(left_shred, right_shred image.Image) float64 {
         return similarity
 }
 
-func FindShredWidth(img *image.Gray) int {
+func FindShredWidth(img *image.Gray) {
         bounds := img.Bounds()
         width := bounds.Max.X
         height := bounds.Max.Y
         avg := make([]float64,width)
         for x:=0; x < width; x++ {
-                tmp := 0.0
+                tmp := 0
                 for y:=0; y < height; y++ {
-                        tmp += 0.0
+                        tmp += int(img.Pix[x + y*img.Stride])
                 }
-                avg[x] = tmp / float64(height)
+                avg[x] = float64(tmp) / float64(height)
         }
-        for z:=0; z < width; z++ {
-                fmt.Println("%.2f\n",avg[z])
+        /* for z:=0; z < width; z++ {
+                fmt.Printf("%.2f\n",avg[z])
+        } */
+        diff := make([]float64,width)
+        for z:=1; z < width; z++ {
+                diff[z] = math.Fabs(avg[z] - avg[z-1])
         }
+        diff[0] = 0.0
+        /* for z:=0; z < width; z++ {
+                fmt.Printf("%.2f\n",diff[z])
+        } */
+        shred_width = 0
+        for threshold:=1;threshold < 255;threshold++ {
+                boundaries := make([]int,width)
+                for z:=0;z<width;z++ {
+                        boundaries[z] = width + 1
+                }
+                count := 0
+                for z:=1;z < width;z++ {
+                        if diff[z] > float64(threshold) {
+                                boundaries[count] = z
+                                count++
+                        }                         
+                }
+                for z:=0;z < width; z++ {
+                        fmt.Printf("%d %d\n",threshold,boundaries[z])
+                }
+        }                
         shred_width = 32
-        return 0
 }
 
 //
@@ -218,6 +242,13 @@ func WritePNGFile(filename string, img image.Image) {
 // =====================================================================
 // UTILITY
 // =====================================================================
+
+func gcd(a,b int) int {
+        for b != 0 {
+                a,b = b, a%b
+        }        
+        return a
+}
 
 func DbgPrintln(to_print ...interface{}) (n int, err os.Error) {
         if DEBUG {
