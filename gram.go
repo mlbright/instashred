@@ -18,6 +18,7 @@ import (
         "image/draw"
         "image/png"
         "math"
+        "container/vector"
 )
 
 const DEBUG bool = false
@@ -117,32 +118,21 @@ func FindShredWidth(img *image.Gray) {
                 }
                 avg[x] = float64(tmp) / float64(height)
         }
-        /* for z:=0; z < width; z++ {
-                fmt.Printf("%.2f\n",avg[z])
-        } */
         diff := make([]float64,width)
         for z:=1; z < width; z++ {
                 diff[z] = math.Fabs(avg[z] - avg[z-1])
         }
         diff[0] = 0.0
-        /* for z:=0; z < width; z++ {
-                fmt.Printf("%.2f\n",diff[z])
-        } */
         shred_width = 0
         for threshold:=1;threshold < 255;threshold++ {
-                boundaries := make([]int,width)
-                for z:=0;z<width;z++ {
-                        boundaries[z] = width + 1
-                }
-                count := 0
-                for z:=1;z < width;z++ {
-                        if diff[z] > float64(threshold) {
-                                boundaries[count] = z
-                                count++
+                var boundaries vector.IntVector
+                for i,_ := range diff {
+                        if diff[i] > float64(threshold) {
+                                boundaries.Push(i)
                         }                         
                 }
-                for z:=0;z < width; z++ {
-                        fmt.Printf("%d %d\n",threshold,boundaries[z])
+                for _,v := range boundaries {
+                        fmt.Printf("%d %d\n",threshold,v)
                 }
         }                
         shred_width = 32
