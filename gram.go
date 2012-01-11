@@ -125,6 +125,9 @@ func FindShredWidth(img *image.Gray) {
         diff[0] = 0.0
         shred_width = 0
         for threshold:=1;threshold < 255;threshold++ {
+                if shred_width >= 5 {
+                        break
+                }
                 var boundaries vector.IntVector
                 for i,_ := range diff {
                         if diff[i] > float64(threshold) {
@@ -134,8 +137,17 @@ func FindShredWidth(img *image.Gray) {
                 for _,v := range boundaries {
                         fmt.Printf("%d %d\n",threshold,v)
                 }
+                if len(boundaries) == 0 {
+                        shred_width = 0
+                        continue
+                }
+                tmp := boundaries[0]
+                for b:=1;b<len(boundaries);b++ {
+                        tmp = gcd(tmp,boundaries[b])
+                }
+                shred_width = tmp
         }                
-        shred_width = 32
+        fmt.Printf("%d\n",shred_width)
 }
 
 //
