@@ -134,9 +134,6 @@ func FindShredWidth(img *image.Gray) {
                                 boundaries.Push(i)
                         }                         
                 }
-                for _,v := range boundaries {
-                        fmt.Printf("%d %d\n",threshold,v)
-                }
                 if len(boundaries) == 0 {
                         shred_width = 0
                         continue
@@ -147,7 +144,6 @@ func FindShredWidth(img *image.Gray) {
                 }
                 shred_width = tmp
         }                
-        fmt.Printf("%d\n",shred_width)
 }
 
 //
