@@ -106,6 +106,8 @@ func ShredSimilarity(left_shred, right_shred image.Image) float64 {
         return similarity
 }
 
+// Adapted/ported the neat recipe/method by Manuel Ebert at 
+//   http://portwempreludium.tumblr.com/post/13108758604/instagram-unshredding
 func FindShredWidth(img *image.Gray) {
         bounds := img.Bounds()
         width := bounds.Max.X
